@@ -1,37 +1,43 @@
 module WASQLite (
   module InternalExported,
-  newDB,
-  closeDB,
-  queryDB,
-  queryObjectDB
+  open,
+  close,
+  exec,
+  execA,
+  execO
 ) where
 
 import Prelude
 
+import Control.Monad.Except (runExcept)
 import Data.Either (Either(..))
-import Effect.Aff (Aff, makeAff)
-import Effect.Uncurried as EU
-import Foreign (Foreign)
-import WASQLite.Internal as Internal
+import Data.Traversable (traverse)
+import Effect.Aff (Aff, error, throwError)
+import Foreign (Foreign, readArray)
+import Promise.Aff as Promise
 import WASQLite.Internal (FilePath, Query, Param, DBConnection)
 import WASQLite.Internal (FilePath, Query, Param, DBConnection) as InternalExported
+import WASQLite.Internal as Internal
 
-import Promise.Aff as Promise
+open :: FilePath -> Aff DBConnection
+open = Internal._open >>> Promise.toAffE
 
-newDB :: FilePath -> Aff DBConnection
-newDB = Internal._newDB >>> Promise.toAffE
+close :: DBConnection -> Aff Unit
+close = Internal._close >>> Promise.toAffE
 
-closeDB :: DBConnection -> Aff Unit
-closeDB = Internal._closeDB >>> Promise.toAffE
+exec :: DBConnection -> Query -> Array Param -> Aff Unit
+exec db q p = Promise.toAffE $ Internal._exec db q p
 
-queryDB :: DBConnection -> Query -> Array Param -> Aff Foreign
-queryDB db q p = Promise.toAffE $ Internal._queryDB db q p
+execA :: DBConnection -> Query -> Array Param -> Aff (Array (Array Foreign))
+execA db q p = do
+  res <- Promise.toAffE $ Internal._execA db q p
+  case runExcept (traverse readArray =<< readArray res) of
+    Left err -> throwError $ error $ show err
+    Right r -> pure r
 
-
--- | fairly unsafe function for using an object with a query, see https://github.com/mapbox/node-sqlite3/wiki/API#databaserunsql-param--callback
-queryObjectDB :: forall params. DBConnection -> Query -> { | params } -> Aff Foreign
-queryObjectDB conn query params = makeAff \cb ->
-  mempty <$
-    EU.runEffectFn5 Internal._queryObjectDB conn query params
-      (EU.mkEffectFn1 $ cb <<< Left)
-      (EU.mkEffectFn1 $ cb <<< Right)
+execO :: DBConnection -> Query -> Array Param -> Aff (Array Foreign)
+execO db q p = do
+  res <- Promise.toAffE $ Internal._execO db q p
+  case runExcept (readArray res) of
+    Left err -> throwError $ error $ show err
+    Right r -> pure r

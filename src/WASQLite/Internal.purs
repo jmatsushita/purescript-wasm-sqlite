@@ -3,17 +3,16 @@ module WASQLite.Internal (
   Query,
   Param,
   DBConnection,
-  _newDB,
-  _closeDB,
-  _queryDB,
-  _queryObjectDB
+  _open,
+  _close,
+  _exec,
+  _execA,
+  _execO
 ) where
 
 import Prelude
 
 import Effect (Effect)
-import Effect.Exception (Error)
-import Effect.Uncurried as EU
 import Foreign (Foreign)
 import Promise.Aff (Promise)
 
@@ -23,17 +22,13 @@ type Param = Foreign
 
 foreign import data DBConnection :: Type
 
-foreign import _newDB :: FilePath -> Effect (Promise DBConnection)
+foreign import _open :: FilePath -> Effect (Promise DBConnection)
 
-foreign import _closeDB :: DBConnection -> Effect (Promise Unit)
+foreign import _close :: DBConnection -> Effect (Promise Unit)
 
-foreign import _queryDB :: DBConnection -> Query -> Array Param -> Effect (Promise Foreign)
+foreign import _exec :: DBConnection -> Query -> Array Param -> Effect (Promise Unit)
 
-foreign import _queryObjectDB :: forall params.
-  EU.EffectFn5
-    DBConnection
-    Query
-    { | params}
-    (EU.EffectFn1 Error Unit)
-    (EU.EffectFn1 Foreign Unit)
-    Unit
+foreign import _execA :: DBConnection -> Query -> Array Param -> Effect (Promise Foreign)
+
+foreign import _execO :: DBConnection -> Query -> Array Param -> Effect (Promise Foreign)
+

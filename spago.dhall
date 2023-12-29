@@ -1,15 +1,16 @@
 { name = "purescript-wasm-sqlite"
 , dependencies =
   [ "aff"
-  , "datetime"
+  , "console"
   , "effect"
   , "either"
-  , "exceptions"
+  , "foldable-traversable"
   , "foreign"
   , "js-promise-aff"
   , "prelude"
   , "spec"
   , "spec-mocha"
+  , "transformers"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

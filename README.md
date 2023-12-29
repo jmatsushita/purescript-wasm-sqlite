@@ -57,6 +57,6 @@ yarn test:watch
 
  - [x] rename exports to reflect the low level api.
  - [x] implement `execO`/`execA`
- - [ ] implement binding params
+ - [x] implement binding params
  - [ ] fix wasm loading
  - [ ] implement prepared statements
