@@ -1,0 +1,15 @@
+{
+  "name": "purescript-wasm-sqlite",
+  "scripts": {
+    "test:build": "spago bundle-app --main Test.Main --to ./output/test.js",
+    "test:watch": "spago bundle-app --watch --main Test.Main --to ./output/test.js --then \"mocha ./output/test.js\"",
+    "test:browser": "$npm_execpath run test:build && parcel test/index.html --open"
+  },
+  "dependencies": {
+    "@vlcn.io/crsqlite-wasm": "^0.16.0"
+  },
+  "packageManager": "yarn@4.0.2",
+  "devDependencies": {
+    "parcel": "^2.10.3"
+  }
+}
