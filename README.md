@@ -1,6 +1,6 @@
 # purescript-wasm-sqlite
 
-Bindings for Sqlite3 in the browser with wa-sqlite or cr-sqlite.
+Bindings for Sqlite3 in the browser via Wasm with wa-sqlite or cr-sqlite. Wraps part of [this API](https://vlcn.io/docs/js/wasm)
 
 NOTE: Use `purescript-node-sqlite3` in nodejs, this module will only work in the browser (or possibly another wasm runtime). 
 
@@ -58,5 +58,6 @@ yarn test:watch
  - [x] rename exports to reflect the low level api.
  - [x] implement `execO`/`execA`
  - [x] implement binding params
- - [ ] fix wasm loading
+ - [ ] test with `wa-sqlite`
+ - [ ] fix manual wasm loading steps
  - [ ] implement prepared statements
