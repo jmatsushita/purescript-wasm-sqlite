@@ -1,7 +1,7 @@
 import initWasm from "@vlcn.io/crsqlite-wasm";
-import wasmUrl from "@vlcn.io/crsqlite-wasm/crsqlite.wasm?url";
+// import wasmUrl from "../../node_modules/@vlcn.io/crsqlite-wasm/dist/crsqlite.wasm";
 
-const sqlite = await initWasm(() => wasmUrl);
+const sqlite = await initWasm();
 
 export function _newDB(filename) {
   return function () {
