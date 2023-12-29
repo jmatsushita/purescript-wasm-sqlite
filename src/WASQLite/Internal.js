@@ -3,36 +3,12 @@ import initWasm from "@vlcn.io/crsqlite-wasm";
 
 const sqlite = await initWasm();
 
-export function _newDB(filename) {
-  return function () {
-    return sqlite.open(filename);
-  };
-}
+export const _newDB = (filename) => () => sqlite.open(filename);
 
-export function _closeDB(db, eb, cb) {
-  db.close(function (err) {
-    if (err) {
-      eb(err);
-    } else {
-      cb();
-    }
-  });
-}
+export const _closeDB = (db) => () => db.close();
 
-export function _queryDB(db, query, params, eb, cb) {
-  db.all.apply(
-    db,
-    [query].concat(
-      params.concat(function (err, rows) {
-        if (err) {
-          eb(err);
-        } else {
-          cb(rows);
-        }
-      })
-    )
-  );
-}
+export const _queryDB = (db) => (query) => (params) => () =>
+  db.exec(query, params);
 
 export function _queryObjectDB(db, query, params, eb, cb) {
   db.all(query, params, function (err, rows) {

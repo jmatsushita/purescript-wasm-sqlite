@@ -2,17 +2,37 @@ module Test.Main where
 
 import Prelude
 
+import Control.Monad.Except (runExcept)
+import Data.Either (Either(..))
+import Data.Newtype (overF)
 import Data.Time.Duration (Milliseconds(..))
+import Data.Traversable (traverse)
 import Effect (Effect)
-import Effect.Aff (delay)
+import Effect.Aff (attempt, delay, error, throwError, bracket)
+import Foreign (Foreign, readArray, readInt, readNumber, readString)
 import Test.Spec (describe, it, pending)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Mocha (runMocha)
-import WASQLite (newDB)
+import WASQLite (closeDB, newDB, queryDB)
 
 main :: Effect Unit
 main = runMocha do
-  describe "it should create a new connection" $
-    it "runs newDB with :memory: path" do
-      _ <- newDB ":memory:"
-      "ok" `shouldEqual` "ok"
+
+  describe ":memory:" $ do
+    describe "it should open and close" $ do
+      it "runs newDB" do
+        _ <- newDB ":memory:"
+        "ok" `shouldEqual` "ok"
+
+      it "runs newDB and closeDB " do
+        db <- newDB ":memory:"
+        _ <- closeDB db
+        "ok" `shouldEqual` "ok"
+
+    describe "it should query" $ do
+      it "runs basic queryDB" do
+        bracket (newDB ":memory:") closeDB \db -> do
+          res <- queryDB db "SELECT 1 + 1" []
+          case runExcept $ (traverse <<< traverse) readInt =<< traverse readArray =<< readArray res of
+            Left err -> throwError $ error $ show err
+            Right ints -> ints `shouldEqual` [[2]]

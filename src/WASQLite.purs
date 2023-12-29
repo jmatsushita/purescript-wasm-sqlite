@@ -22,17 +22,11 @@ newDB :: FilePath -> Aff DBConnection
 newDB = Internal._newDB >>> Promise.toAffE
 
 closeDB :: DBConnection -> Aff Unit
-closeDB conn = makeAff \cb ->
-  mempty <$ EU.runEffectFn3 Internal._closeDB conn
-    (EU.mkEffectFn1 $ cb <<< Left)
-    (cb $ Right unit)
+closeDB = Internal._closeDB >>> Promise.toAffE
 
 queryDB :: DBConnection -> Query -> Array Param -> Aff Foreign
-queryDB conn query params = makeAff \cb ->
-  mempty <$
-    EU.runEffectFn5 Internal._queryDB conn query params
-      (EU.mkEffectFn1 $ cb <<< Left)
-      (EU.mkEffectFn1 $ cb <<< Right)
+queryDB db q p = Promise.toAffE $ Internal._queryDB db q p
+
 
 -- | fairly unsafe function for using an object with a query, see https://github.com/mapbox/node-sqlite3/wiki/API#databaserunsql-param--callback
 queryObjectDB :: forall params. DBConnection -> Query -> { | params } -> Aff Foreign

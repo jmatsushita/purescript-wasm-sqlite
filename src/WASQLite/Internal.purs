@@ -14,9 +14,8 @@ import Prelude
 import Effect (Effect)
 import Effect.Exception (Error)
 import Effect.Uncurried as EU
-import Promise.Aff (Promise)
-
 import Foreign (Foreign)
+import Promise.Aff (Promise)
 
 type FilePath = String
 type Query = String
@@ -26,21 +25,9 @@ foreign import data DBConnection :: Type
 
 foreign import _newDB :: FilePath -> Effect (Promise DBConnection)
 
-foreign import _closeDB ::
-  EU.EffectFn3
-    DBConnection
-    (EU.EffectFn1 Error Unit)
-    (Effect Unit)
-    Unit
+foreign import _closeDB :: DBConnection -> Effect (Promise Unit)
 
-foreign import _queryDB ::
-  EU.EffectFn5
-    DBConnection
-    Query
-    (Array Param)
-    (EU.EffectFn1 Error Unit)
-    (EU.EffectFn1 Foreign Unit)
-    Unit
+foreign import _queryDB :: DBConnection -> Query -> Array Param -> Effect (Promise Foreign)
 
 foreign import _queryObjectDB :: forall params.
   EU.EffectFn5
